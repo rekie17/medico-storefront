@@ -1,25 +1,71 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  Wind,
+  Activity,
+  Pill,
+  Heart,
+  Thermometer,
+  Settings,
+  Package,
+  Repeat,
+  Loader2,
+} from "lucide-react";
 import Hero from "@/components/Hero";
 import TrustBadges from "@/components/TrustBadges";
 import Services from "@/components/Services";
 import ProductCard from "@/components/ProductCard";
-import { products, categories } from "@/lib/data";
+import {
+  getProductsFromAPI,
+  getCategoriesFromAPI,
+  categories as defaultCategories,
+} from "@/lib/data";
+import type { Product, CategoryInfo } from "@/lib/types";
 
-const featured = products.filter(
-  (p) =>
-    p.id === "prod_cpap_yh550" ||
-    p.id === "prod_bipap_yh730" ||
-    p.id === "prod_neb_407a" ||
-    p.id === "prod_bp_ye670a" ||
-    p.id === "prod_thermo_yht100" ||
-    p.id === "prod_neb_m102"
-);
+const categoryIcons: Record<string, React.ReactNode> = {
+  "cpap-bipap-machines": <Wind className="w-6 h-6 text-[#0077B6]" />,
+  "oxygen-concentrators": <Activity className="w-6 h-6 text-[#0077B6]" />,
+  nebulizers: <Pill className="w-6 h-6 text-[#0077B6]" />,
+  "blood-pressure-monitors": <Heart className="w-6 h-6 text-[#0077B6]" />,
+  thermometers: <Thermometer className="w-6 h-6 text-[#0077B6]" />,
+  "pulse-oximeters": <Activity className="w-6 h-6 text-[#0077B6]" />,
+  "masks-accessories": <Settings className="w-6 h-6 text-[#0077B6]" />,
+  "consumables-parts": <Package className="w-6 h-6 text-[#0077B6]" />,
+  rentals: <Repeat className="w-6 h-6 text-[#0077B6]" />,
+};
 
 export default function Home() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<CategoryInfo[]>(defaultCategories);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [productsData, categoriesData] = await Promise.all([
+          getProductsFromAPI(),
+          getCategoriesFromAPI(),
+        ]);
+        setProducts(productsData);
+        if (categoriesData.length > 0) {
+          setCategories(categoriesData);
+        }
+      } catch (error) {
+        console.error("Failed to load data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  // Take first 6 products as featured
+  const featured = products.slice(0, 6);
+
   return (
     <>
       <Hero />
@@ -50,11 +96,18 @@ export default function Home() {
             </Link>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featured.map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="w-8 h-8 animate-spin text-[#0077B6]" />
+              <span className="ml-3 text-gray-600">Loading products...</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featured.map((product, index) => (
+                <ProductCard key={product.id} product={product} index={index} />
+              ))}
+            </div>
+          )}
 
           <div className="mt-8 text-center sm:hidden">
             <Link
@@ -84,8 +137,8 @@ export default function Home() {
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {categories.map((cat, index) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {categories.slice(0, 10).map((cat, index) => (
               <motion.div
                 key={cat.slug}
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -98,19 +151,9 @@ export default function Home() {
                   className="block bg-white rounded-2xl p-5 text-center hover:shadow-lg hover:border-[#0077B6]/20 border border-gray-100 transition-all group"
                 >
                   <div className="w-12 h-12 mx-auto rounded-xl bg-[#0077B6]/10 group-hover:bg-[#0077B6]/20 flex items-center justify-center transition-colors mb-3">
-                    <span className="text-2xl">
-                      {cat.slug === "cpap-bipap"
-                        ? "💨"
-                        : cat.slug === "oxygen-concentrators"
-                          ? "🫁"
-                          : cat.slug === "nebulizers"
-                            ? "💊"
-                            : cat.slug === "blood-pressure-monitors"
-                              ? "❤️"
-                              : cat.slug === "thermometers"
-                                ? "🌡️"
-                                : "🔧"}
-                    </span>
+                    {categoryIcons[cat.slug] || (
+                      <Package className="w-6 h-6 text-[#0077B6]" />
+                    )}
                   </div>
                   <h3 className="text-sm font-medium text-gray-900 group-hover:text-[#0077B6] transition-colors">
                     {cat.name}

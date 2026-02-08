@@ -1,32 +1,65 @@
 "use client";
 
-import { Suspense, useState, useMemo } from "react";
+import { Suspense, useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X, Loader2 } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import CategoryFilter from "@/components/CategoryFilter";
-import { products } from "@/lib/data";
-import type { ProductCategory } from "@/lib/types";
+import { getProductsFromAPI, getCategoriesFromAPI } from "@/lib/data";
+import type { Product, CategoryInfo, ProductCategory } from "@/lib/types";
 
 function ShopContent() {
   const searchParams = useSearchParams();
-  const categoryParam = searchParams.get("category") as
-    | ProductCategory
-    | null;
+  const categoryParam = searchParams.get("category") as ProductCategory | null;
 
   const [selected, setSelected] = useState<ProductCategory | "all">(
     categoryParam || "all"
   );
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<CategoryInfo[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      try {
+        const [productsData, categoriesData] = await Promise.all([
+          getProductsFromAPI(),
+          getCategoriesFromAPI(),
+        ]);
+        setProducts(productsData);
+        setCategories(categoriesData);
+      } catch (error) {
+        console.error("Failed to load data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
   const filtered = useMemo(
     () =>
       selected === "all"
         ? products
         : products.filter((p) => p.category === selected),
-    [selected]
+    [selected, products]
   );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-28 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-[#0077B6]" />
+            <span className="ml-3 text-gray-600">Loading products...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pt-28 pb-16">
@@ -51,7 +84,11 @@ function ShopContent() {
             className="hidden lg:block w-60 flex-shrink-0"
           >
             <div className="sticky top-28 bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <CategoryFilter selected={selected} onChange={setSelected} />
+              <CategoryFilter
+                selected={selected}
+                onChange={setSelected}
+                categories={categories}
+              />
             </div>
           </motion.aside>
 
@@ -105,6 +142,7 @@ function ShopContent() {
                       setSelected(cat);
                       setMobileFilterOpen(false);
                     }}
+                    categories={categories}
                   />
                 </motion.div>
               </>
@@ -119,11 +157,7 @@ function ShopContent() {
             {/* Product grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {filtered.map((product, index) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  index={index}
-                />
+                <ProductCard key={product.id} product={product} index={index} />
               ))}
             </div>
 
@@ -150,10 +184,7 @@ export default function ShopPage() {
               <div className="h-4 bg-gray-200 rounded w-64" />
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
                 {[...Array(6)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="bg-white rounded-2xl overflow-hidden"
-                  >
+                  <div key={i} className="bg-white rounded-2xl overflow-hidden">
                     <div className="aspect-square bg-gray-200" />
                     <div className="p-4 space-y-3">
                       <div className="h-4 bg-gray-200 rounded w-3/4" />

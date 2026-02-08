@@ -1,17 +1,19 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { categories } from "@/lib/data";
-import type { ProductCategory } from "@/lib/types";
+import { categories as defaultCategories } from "@/lib/data";
+import type { ProductCategory, CategoryInfo } from "@/lib/types";
 
 interface CategoryFilterProps {
   selected: ProductCategory | "all";
   onChange: (category: ProductCategory | "all") => void;
+  categories?: CategoryInfo[];
 }
 
 export default function CategoryFilter({
   selected,
   onChange,
+  categories = defaultCategories,
 }: CategoryFilterProps) {
   return (
     <div className="space-y-2">
@@ -32,7 +34,7 @@ export default function CategoryFilter({
         <motion.button
           key={cat.slug}
           whileHover={{ x: 4 }}
-          onClick={() => onChange(cat.slug)}
+          onClick={() => onChange(cat.slug as ProductCategory)}
           className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
             selected === cat.slug
               ? "bg-[#0077B6] text-white shadow-md"
