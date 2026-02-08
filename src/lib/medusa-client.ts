@@ -8,6 +8,25 @@ const MEDUSA_BACKEND_URL =
 const PUBLISHABLE_KEY =
   process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "";
 
+// Singapore region ID
+const REGION_ID = "reg_01KGXDKDP65J0YRPJ0RF882384";
+
+interface CalculatedPrice {
+  calculated_amount: number;
+  original_amount: number;
+  currency_code: string;
+}
+
+interface MedusaVariant {
+  id: string;
+  title: string;
+  calculated_price?: CalculatedPrice;
+  prices?: {
+    amount: number;
+    currency_code: string;
+  }[];
+}
+
 interface MedusaProduct {
   id: string;
   title: string;
@@ -16,14 +35,7 @@ interface MedusaProduct {
   thumbnail: string | null;
   images: { url: string }[];
   categories: { id: string; name: string; handle: string }[];
-  variants: {
-    id: string;
-    title: string;
-    prices: {
-      amount: number;
-      currency_code: string;
-    }[];
-  }[];
+  variants: MedusaVariant[];
   status: string;
   created_at: string;
 }
@@ -59,7 +71,7 @@ async function medusaFetch<T>(endpoint: string): Promise<T> {
 
   const response = await fetch(url, {
     headers,
-    cache: "no-store", // Always fetch fresh data
+    cache: "no-store",
   });
 
   if (!response.ok) {
@@ -72,7 +84,7 @@ async function medusaFetch<T>(endpoint: string): Promise<T> {
 export async function getProducts(limit = 100): Promise<MedusaProduct[]> {
   try {
     const data = await medusaFetch<ProductsResponse>(
-      `/store/products?limit=${limit}`
+      `/store/products?limit=${limit}&region_id=${REGION_ID}`
     );
     return data.products;
   } catch (error) {
@@ -86,7 +98,7 @@ export async function getProductByHandle(
 ): Promise<MedusaProduct | null> {
   try {
     const data = await medusaFetch<ProductsResponse>(
-      `/store/products?handle=${handle}`
+      `/store/products?handle=${handle}&region_id=${REGION_ID}`
     );
     return data.products[0] || null;
   } catch (error) {
@@ -107,5 +119,5 @@ export async function getCategories(): Promise<MedusaCategory[]> {
   }
 }
 
-export { MEDUSA_BACKEND_URL, PUBLISHABLE_KEY };
-export type { MedusaProduct, MedusaCategory };
+export { MEDUSA_BACKEND_URL, PUBLISHABLE_KEY, REGION_ID };
+export type { MedusaProduct, MedusaCategory, MedusaVariant, CalculatedPrice };

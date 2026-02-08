@@ -84,8 +84,6 @@ function getPlaceholderImage(title: string): string {
 
 function mapMedusaProductToProduct(medusaProduct: MedusaProduct): Product {
   const category = medusaProduct.categories?.[0];
-  const variant = medusaProduct.variants?.[0];
-  const price = variant?.prices?.[0];
 
   return {
     id: medusaProduct.id,
@@ -96,14 +94,24 @@ function mapMedusaProductToProduct(medusaProduct: MedusaProduct): Product {
     thumbnail: medusaProduct.thumbnail || getPlaceholderImage(medusaProduct.title),
     images: medusaProduct.images?.map((img) => img.url) || [getPlaceholderImage(medusaProduct.title)],
     tags: [],
-    variants: medusaProduct.variants?.map((v) => ({
-      id: v.id,
-      title: v.title,
-      prices: v.prices?.map((p) => ({
-        amount: p.amount / 100, // Medusa stores in cents
-        currency_code: p.currency_code.toUpperCase(),
-      })) || [],
-    })) || [],
+    variants: medusaProduct.variants?.map((v) => {
+      // Use calculated_price from Medusa v2 (requires region_id in query)
+      const calcPrice = v.calculated_price;
+      const prices = calcPrice
+        ? [{
+            amount: calcPrice.calculated_amount / 100, // Convert from cents
+            currency_code: calcPrice.currency_code.toUpperCase(),
+            sale_amount: calcPrice.original_amount !== calcPrice.calculated_amount
+              ? calcPrice.original_amount / 100
+              : undefined,
+          }]
+        : [];
+      return {
+        id: v.id,
+        title: v.title,
+        prices,
+      };
+    }) || [],
     isRental: medusaProduct.title.toLowerCase().includes("rental"),
     isConsumable:
       medusaProduct.title.toLowerCase().includes("consumable") ||
