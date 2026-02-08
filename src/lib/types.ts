@@ -3,7 +3,7 @@ export interface Product {
   title: string;
   handle: string;
   description: string;
-  category: ProductCategory;
+  category: string;
   thumbnail: string;
   images: string[];
   variants: ProductVariant[];
@@ -26,13 +26,8 @@ export interface MoneyAmount {
   sale_amount?: number;
 }
 
-export type ProductCategory =
-  | "cpap-bipap"
-  | "oxygen-concentrators"
-  | "nebulizers"
-  | "blood-pressure-monitors"
-  | "thermometers"
-  | "consumables";
+// Product category can be any string from the API
+export type ProductCategory = string;
 
 export interface CartItem {
   product: Product;
@@ -41,7 +36,7 @@ export interface CartItem {
 }
 
 export interface CategoryInfo {
-  slug: ProductCategory;
+  slug: string;
   name: string;
   description: string;
 }
