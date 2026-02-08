@@ -59,7 +59,7 @@ async function medusaFetch<T>(endpoint: string): Promise<T> {
 
   const response = await fetch(url, {
     headers,
-    next: { revalidate: 60 }, // Cache for 60 seconds
+    cache: "no-store", // Always fetch fresh data
   });
 
   if (!response.ok) {
