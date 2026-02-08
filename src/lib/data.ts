@@ -6,6 +6,7 @@ import {
   type MedusaProduct,
   type MedusaCategory,
 } from "./medusa-client";
+import { getProductImage } from "./product-images";
 
 // Static fallback categories
 export const categories: CategoryInfo[] = [
@@ -84,6 +85,9 @@ function getPlaceholderImage(title: string): string {
 
 function mapMedusaProductToProduct(medusaProduct: MedusaProduct): Product {
   const category = medusaProduct.categories?.[0];
+  // Use real product image from medico.com.sg, fall back to Medusa image, then placeholder
+  const productImg = getProductImage(medusaProduct.handle);
+  const thumbnail = productImg || medusaProduct.thumbnail || getPlaceholderImage(medusaProduct.title);
 
   return {
     id: medusaProduct.id,
@@ -91,8 +95,8 @@ function mapMedusaProductToProduct(medusaProduct: MedusaProduct): Product {
     handle: medusaProduct.handle,
     description: medusaProduct.description || "",
     category: category?.handle || "uncategorized",
-    thumbnail: medusaProduct.thumbnail || getPlaceholderImage(medusaProduct.title),
-    images: medusaProduct.images?.map((img) => img.url) || [getPlaceholderImage(medusaProduct.title)],
+    thumbnail: thumbnail,
+    images: productImg ? [productImg] : medusaProduct.images?.map((img) => img.url) || [getPlaceholderImage(medusaProduct.title)],
     tags: [],
     variants: medusaProduct.variants?.map((v) => {
       // Use calculated_price from Medusa v2 (requires region_id in query)
