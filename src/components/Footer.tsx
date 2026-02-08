@@ -1,9 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Clock, Phone, Mail } from "lucide-react";
 
 const quickLinks = [
   { href: "/shop", label: "Shop All" },
-  { href: "/shop?category=cpap-bipap", label: "CPAP / BiPAP" },
+  { href: "/shop?category=cpap-bipap-machines", label: "CPAP / BiPAP" },
+  { href: "/shop?category=oxygen-concentrators", label: "Oxygen Concentrators" },
   { href: "/shop?category=nebulizers", label: "Nebulizers" },
   { href: "/shop?category=blood-pressure-monitors", label: "BP Monitors" },
   { href: "/shop?category=thermometers", label: "Thermometers" },
@@ -22,10 +24,15 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div>
-            <div className="text-2xl font-bold mb-4">
-              <span className="text-[#0077B6]">Medico</span>
-              <span className="text-gray-400">.com.sg</span>
-            </div>
+            <Link href="/" className="inline-block mb-4">
+              <Image
+                src="/logo.png"
+                alt="Medico"
+                width={140}
+                height={94}
+                className="h-16 w-auto brightness-0 invert"
+              />
+            </Link>
             <p className="text-sm leading-relaxed text-gray-400">
               Yuwell Main Distributor in Singapore. Trusted by over 30
               healthcare institutions islandwide for quality medical equipment

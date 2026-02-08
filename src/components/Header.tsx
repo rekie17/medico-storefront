@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Menu, X, Phone } from "lucide-react";
@@ -62,19 +63,15 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2">
-              <div
-                className={`font-bold text-2xl transition-colors ${
-                  scrolled ? "text-[#0077B6]" : "text-white"
-                }`}
-              >
-                <span className="text-[#0077B6]">Medico</span>
-                {scrolled ? (
-                  <span className="text-gray-600">.com.sg</span>
-                ) : (
-                  <span className="text-blue-200">.com.sg</span>
-                )}
-              </div>
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/logo.png"
+                alt="Medico"
+                width={120}
+                height={80}
+                className="h-12 w-auto"
+                priority
+              />
             </Link>
 
             {/* Desktop nav */}
