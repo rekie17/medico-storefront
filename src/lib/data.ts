@@ -85,9 +85,9 @@ function getPlaceholderImage(title: string): string {
 
 function mapMedusaProductToProduct(medusaProduct: MedusaProduct): Product {
   const category = medusaProduct.categories?.[0];
-  // Use real product image from medico.com.sg, fall back to Medusa image, then placeholder
+  // Prefer Medusa thumbnail (now on Vercel Blob), fall back to local mapping, then placeholder
   const productImg = getProductImage(medusaProduct.handle);
-  const thumbnail = productImg || medusaProduct.thumbnail || getPlaceholderImage(medusaProduct.title);
+  const thumbnail = medusaProduct.thumbnail || productImg || getPlaceholderImage(medusaProduct.title);
 
   return {
     id: medusaProduct.id,
@@ -96,7 +96,11 @@ function mapMedusaProductToProduct(medusaProduct: MedusaProduct): Product {
     description: medusaProduct.description || "",
     category: category?.handle || "uncategorized",
     thumbnail: thumbnail,
-    images: productImg ? [productImg] : medusaProduct.images?.map((img) => img.url) || [getPlaceholderImage(medusaProduct.title)],
+    images: medusaProduct.thumbnail 
+      ? [medusaProduct.thumbnail] 
+      : productImg 
+        ? [productImg] 
+        : medusaProduct.images?.map((img) => img.url) || [getPlaceholderImage(medusaProduct.title)],
     tags: [],
     variants: medusaProduct.variants?.map((v) => {
       // Use calculated_price from Medusa v2 (requires region_id in query)
