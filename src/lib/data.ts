@@ -83,11 +83,22 @@ function getPlaceholderImage(title: string): string {
   return IMG.medical;
 }
 
+function decodeImageUrl(url: string): string {
+  try {
+    return decodeURIComponent(url);
+  } catch {
+    return url;
+  }
+}
+
 function mapMedusaProductToProduct(medusaProduct: MedusaProduct): Product {
   const category = medusaProduct.categories?.[0];
-  // Prefer Medusa thumbnail (now on Vercel Blob), fall back to local mapping, then placeholder
   const productImg = getProductImage(medusaProduct.handle);
-  const thumbnail = medusaProduct.thumbnail || productImg || getPlaceholderImage(medusaProduct.title);
+  // Prefer Medusa images (S3), fall back to local mapping, then placeholder
+  const medusaImages = medusaProduct.images?.map((img) => decodeImageUrl(img.url)).filter(Boolean);
+  const thumbnail = medusaProduct.thumbnail
+    ? decodeImageUrl(medusaProduct.thumbnail)
+    : medusaImages?.[0] || productImg || getPlaceholderImage(medusaProduct.title);
 
   return {
     id: medusaProduct.id,
@@ -96,11 +107,11 @@ function mapMedusaProductToProduct(medusaProduct: MedusaProduct): Product {
     description: medusaProduct.description || "",
     category: category?.handle || "uncategorized",
     thumbnail: thumbnail,
-    images: medusaProduct.thumbnail 
-      ? [medusaProduct.thumbnail] 
-      : productImg 
-        ? [productImg] 
-        : medusaProduct.images?.map((img) => img.url) || [getPlaceholderImage(medusaProduct.title)],
+    images: medusaImages && medusaImages.length > 0
+      ? medusaImages
+      : productImg
+        ? [productImg]
+        : [getPlaceholderImage(medusaProduct.title)],
     tags: [],
     variants: medusaProduct.variants?.map((v) => {
       // Use calculated_price from Medusa v2 (requires region_id in query)
