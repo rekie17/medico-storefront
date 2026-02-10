@@ -168,5 +168,5 @@ export function getProductsByCategory(category: string): Product[] {
 }
 
 export function formatPrice(amount: number): string {
-  return `$${amount.toFixed(2)}`;
+  return `$${amount.toLocaleString('en-SG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
