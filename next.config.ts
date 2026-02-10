@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "loma-client-media.s3.ap-southeast-1.amazonaws.com",
       },
+      {
+        protocol: "https",
+        hostname: "9sjzhbcgs1nuxebj.public.blob.vercel-storage.com",
+      },
     ],
   },
 };
