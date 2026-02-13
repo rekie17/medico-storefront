@@ -4,14 +4,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Menu, X, Phone } from "lucide-react";
+import { ShoppingCart, Menu, X, Search } from "lucide-react";
 import { useCartStore } from "@/lib/store";
 import Cart from "./Cart";
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop" },
-  { href: "/about", label: "About Us" },
+  { href: "/about", label: "Company" },
+  { href: "/shop", label: "Products" },
+  { href: "/services", label: "Services" },
+  { href: "/where-to-buy", label: "Where to Buy" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -28,79 +29,57 @@ export default function Header() {
 
   return (
     <>
-      <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? "bg-white/95 backdrop-blur-md shadow-md"
-            : "bg-transparent"
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 bg-white transition-shadow duration-300 ${
+          scrolled ? "shadow-md" : ""
         }`}
       >
-        {/* Top bar */}
-        <div
-          className={`transition-all duration-300 overflow-hidden ${
-            scrolled ? "max-h-0 opacity-0" : "max-h-10 opacity-100"
-          }`}
-        >
-          <div className="bg-[#0077B6] text-white text-sm">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 flex justify-between items-center">
-              <span>Yuwell Main Distributor | Singapore</span>
-              <a
-                href="tel:+65"
-                className="flex items-center gap-1 hover:text-blue-200 transition-colors"
-              >
-                <Phone size={14} />
-                <span className="hidden sm:inline">
-                  By Appointment Only
-                </span>
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* Main nav */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link href="/" className="flex items-center">
+            <Link href="/" className="flex-shrink-0">
               <Image
                 src="/logo.png"
                 alt="Medico"
-                width={120}
-                height={80}
-                className="h-12 w-auto"
+                width={80}
+                height={64}
+                className="h-14 w-auto"
                 priority
               />
             </Link>
 
-            {/* Desktop nav */}
-            <nav className="hidden md:flex items-center gap-8">
+            {/* Desktop nav links */}
+            <nav className="hidden lg:flex items-center gap-8">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-sm font-medium transition-colors hover:text-[#0077B6] ${
-                    scrolled ? "text-gray-700" : "text-white"
-                  }`}
+                  className="text-sm font-medium text-gray-700 hover:text-[#0077B6] transition-colors whitespace-nowrap"
                 >
                   {link.label}
                 </Link>
               ))}
             </nav>
 
-            {/* Actions */}
-            <div className="flex items-center gap-4">
+            {/* Right side: search, cart, Product Inquiry */}
+            <div className="flex items-center gap-3">
+              {/* Search bar - desktop */}
+              <div className="hidden md:flex items-center bg-gray-50 border border-gray-200 rounded-full px-4 py-2 gap-2 w-52 focus-within:border-[#0077B6] focus-within:ring-1 focus-within:ring-[#0077B6]/20 transition-all">
+                <Search size={18} className="text-gray-400 flex-shrink-0" />
+                <input
+                  type="text"
+                  placeholder="search products..."
+                  className="bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none w-full"
+                />
+              </div>
+
+              {/* Cart button */}
               <button
                 onClick={toggleCart}
-                className={`relative p-2 rounded-full transition-colors ${
-                  scrolled
-                    ? "text-gray-700 hover:bg-gray-100"
-                    : "text-white hover:bg-white/20"
-                }`}
+                className="relative p-2 rounded-full text-gray-700 hover:bg-gray-100 transition-colors"
                 aria-label="Open cart"
               >
-                <ShoppingCart size={22} />
+                <ShoppingCart size={20} />
                 {totalItems() > 0 && (
                   <motion.span
                     initial={{ scale: 0 }}
@@ -112,13 +91,18 @@ export default function Header() {
                 )}
               </button>
 
+              {/* Product Inquiry CTA */}
+              <Link
+                href="/contact"
+                className="hidden md:inline-flex items-center bg-[#0077B6] text-white text-sm font-medium px-5 py-2.5 rounded-full hover:bg-[#005f8f] transition-colors whitespace-nowrap"
+              >
+                Product Inquiry
+              </Link>
+
+              {/* Mobile menu toggle */}
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className={`md:hidden p-2 rounded-full transition-colors ${
-                  scrolled
-                    ? "text-gray-700 hover:bg-gray-100"
-                    : "text-white hover:bg-white/20"
-                }`}
+                className="lg:hidden p-2 rounded-full text-gray-700 hover:bg-gray-100 transition-colors"
                 aria-label="Toggle menu"
               >
                 {mobileOpen ? <X size={22} /> : <Menu size={22} />}
@@ -134,24 +118,42 @@ export default function Header() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-white border-t shadow-lg"
+              className="lg:hidden bg-white border-t shadow-lg"
             >
-              <nav className="flex flex-col px-4 py-4 gap-2">
+              <nav className="flex flex-col px-4 py-4 gap-1">
+                {/* Mobile search */}
+                <div className="flex items-center bg-gray-50 border border-gray-200 rounded-full px-4 py-2.5 gap-2 mb-3 md:hidden">
+                  <Search size={18} className="text-gray-400 flex-shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="search products..."
+                    className="bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none w-full"
+                  />
+                </div>
+
                 {navLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className="text-gray-700 hover:text-[#0077B6] font-medium py-2 px-3 rounded-lg hover:bg-blue-50 transition-colors"
+                    className="text-gray-700 hover:text-[#0077B6] font-medium py-2.5 px-3 rounded-lg hover:bg-blue-50 transition-colors"
                   >
                     {link.label}
                   </Link>
                 ))}
+
+                <Link
+                  href="/contact"
+                  onClick={() => setMobileOpen(false)}
+                  className="mt-2 flex items-center justify-center bg-[#0077B6] text-white text-sm font-medium px-5 py-3 rounded-full hover:bg-[#005f8f] transition-colors md:hidden"
+                >
+                  Product Inquiry
+                </Link>
               </nav>
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.header>
+      </header>
 
       {/* Cart drawer */}
       <AnimatePresence>
