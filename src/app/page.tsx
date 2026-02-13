@@ -7,7 +7,8 @@ import type { CategoryItem } from "@/components/CategoriesSection";
 import { getProductImage } from "@/lib/product-images";
 
 const API = "https://medico-backend-production.up.railway.app";
-const REGION_ID = "reg_01JKA0ZFGWFM0G4ATCJAZY3YK2";
+const REGION_ID = "reg_01KGXDKDP65J0YRPJ0RF882384";
+const PUBLISHABLE_KEY = "pk_258fb1cf97ba3814a8ef3aeb12e9438d3958a4fc54e0eee1856e6cff5ea08119";
 
 function decodeUrl(url: string): string {
   try {
@@ -21,7 +22,7 @@ async function fetchProducts(): Promise<CarouselProduct[]> {
   try {
     const res = await fetch(
       `${API}/store/products?limit=10&fields=*variants.calculated_price&region_id=${REGION_ID}`,
-      { cache: "no-store" }
+      { cache: "no-store", headers: { "x-publishable-api-key": PUBLISHABLE_KEY } }
     );
     if (!res.ok) return [];
     const data = await res.json();
@@ -59,6 +60,7 @@ async function fetchCategories(): Promise<CategoryItem[]> {
   try {
     const res = await fetch(`${API}/store/product-categories`, {
       cache: "no-store",
+      headers: { "x-publishable-api-key": PUBLISHABLE_KEY },
     });
     if (!res.ok) return [];
     const data = await res.json();
